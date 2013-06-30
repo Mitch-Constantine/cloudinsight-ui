@@ -1,4 +1,4 @@
-require 'net/HTTP'
+require 'net/http'
 
 def passThroughToApi(config, params)
 	path = "/api/" + params[:splat][0]
