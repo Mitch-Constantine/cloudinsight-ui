@@ -1,15 +1,21 @@
-<html>
+<html ng-app="cloudInsightUI">
 	<head>
 		<link rel="stylesheet" href="css/screen.css" type="text/css" media="screen, projection">
 		<link rel="stylesheet" href="css/print.css" type="text/css" media="print">
 		<!--[if lt IE 8]>
 		  <link rel="stylesheet" href="css/ie.css" type="text/css" media="screen, projection">
 		<![endif]-->	
+	
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular-resource.js"></script>
+		<script src="coffee/TestController.js"></script>
 	</head>
-	<body>
+	<body ng-controller="TestController">
 		<h1>CloudInsight UI</h1>
-		<div>
-			This is the main page of CloudInsight UI
-		</div>
+		<ul>
+			<li ng-repeat="topology in topologies.all">
+				{{topology.name}}
+			</li>
+		</ul>
 	</body>
 </html>
