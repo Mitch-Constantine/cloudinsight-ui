@@ -1,5 +1,6 @@
 require "coffee-script"
 require 'sinatra'
+require 'sinatra/multi_route'
 
 require './lib/proxy'
 require './lib/configuration'
@@ -17,6 +18,8 @@ get "/coffee/*.js" do
   coffee "public/coffee/#{filename}".to_sym
 end
 
-get "/apiproxy/*" do
-	passThroughToApi config, params
+route :get, :delete, :put, "/apiproxy/*" do
+	result = passThroughToApi config, params, request
+	status result[:status]
+	result[:body]
 end

@@ -2,23 +2,30 @@
 	<head>
 		<link rel="stylesheet" href="css/screen.css" type="text/css" media="screen, projection">
 		<link rel="stylesheet" href="css/print.css" type="text/css" media="print">
+
 		<!--[if lt IE 8]>
 		  <link rel="stylesheet" href="css/ie.css" type="text/css" media="screen, projection">
 		<![endif]-->	
+
+		<link rel="stylesheet" href="css/cloudInsight.css" type="text/css" media="screen, projection">
 	
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular-resource.js"></script>
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
 		<script src="coffee/TestController.js"></script>
 	</head>
 	<body ng-controller="TestController">
 		<div class="container">
 			<h1>CloudInsight UI</h1>
 			<div class="error" ng-show="failed">Error contacting server</div>
-			<ul>
-				<li ng-repeat="topology in topologies.all">
-					{{topology.name}}
-				</li>
-			</ul>
+			<button ng-click="deleteTopology()">Delete</button>
+			<button ng-click="deployTopology()">Deploy</button>
+			<table>
+				<tr ng-repeat="topology in topologies">
+					<td style="width:1em"><input type="checkbox" ng-model="topology.checked"/></td>
+					<td><img ng-show="topology.error" src="images/errorIcon.png" title="{{topology.error}}"></img>{{topology.name}}</td>
+				</tr>
+			</table>
 		</div>
 	</body>
 </html>

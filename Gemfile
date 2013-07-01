@@ -8,6 +8,7 @@ gem "coffee-script"
 gem "therubyracer", :require => 'v8'
 gem "foreman"
 gem "json"
+gem "sinatra-contrib"
 
 group :test do
   gem 'rspec'
