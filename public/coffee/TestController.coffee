@@ -34,9 +34,13 @@ window.TestController = ($scope, $resource, $timeout)->
 			Topology = $resource('/apiproxy/topologies/:id', {id:id})
 			Topology.delete()
 
-	$scope.deployTopology = ()->
+	$scope.deployTopology = ()-> performMassOperation('deploy')
+	$scope.undeployTopology = ()-> performMassOperation('undeploy')
+
+	performMassOperation = (operation)->
+		_.each $scope.topologies, (topology)->topology.error = null
 		_.each getSelectedIds(), (id)->
-			Topology = $resource('/apiproxy/topologies/:id?operation=deploy', {id:id}, {put : {method : "PUT"}})
+			Topology = $resource('/apiproxy/topologies/:id?operation=:operation', {id:id, operation:operation}, {put : {method : "PUT"}})
 			Topology.put(null,
 					->,
 					(response)->
