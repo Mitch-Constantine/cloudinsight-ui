@@ -11,11 +11,14 @@
 		<script src="coffee/TestController.js"></script>
 	</head>
 	<body ng-controller="TestController">
-		<h1>CloudInsight UI</h1>
-		<ul>
-			<li ng-repeat="topology in topologies.all">
-				{{topology.name}}
-			</li>
-		</ul>
+		<div class="container">
+			<h1>CloudInsight UI</h1>
+			<div class="error" ng-show="failed">Error contacting server</div>
+			<ul>
+				<li ng-repeat="topology in topologies.all">
+					{{topology.name}}
+				</li>
+			</ul>
+		</div>
 	</body>
 </html>
