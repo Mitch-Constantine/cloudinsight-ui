@@ -36,6 +36,7 @@ window.TestController = ($scope, $resource, $timeout)->
 
 	$scope.deployTopology = ()-> performMassOperation('deploy')
 	$scope.undeployTopology = ()-> performMassOperation('undeploy')
+	$scope.repairTopology = ()-> performMassOperation('repair')
 
 	performMassOperation = (operation)->
 		_.each $scope.topologies, (topology)->topology.error = null
