@@ -18,7 +18,7 @@ get "/coffee/*.js" do
   coffee "public/coffee/#{filename}".to_sym
 end
 
-route :get, :delete, :put, "/apiproxy/*" do
+route :get, :post, :delete, :put, "/apiproxy/*" do
 	result = passThroughToApi config, params, request
 	status result[:status]
 	result[:body]

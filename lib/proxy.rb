@@ -9,6 +9,10 @@ def passThroughToApi(config, params,request)
 		req = Net::HTTP::Get.new(path)
 	elsif request.request_method == 'DELETE'
 		req = Net::HTTP::Delete.new(path)
+	elsif request.request_method == 'POST'
+		req = Net::HTTP::Post.new(path)
+		req.body = request.body.read()
+		req["Content-Type"] = request.content_type
 	elsif request.request_method == 'PUT'
 		req = Net::HTTP::Put.new(path)
 	end
