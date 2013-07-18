@@ -1,6 +1,7 @@
-angular.module('cloudInsightUI', ['ngResource', 'ui.bootstrap']);
+angular.module('cloudInsightUI', ['ngResource', 'ui.bootstrap', 'ngUpload'])
+.controller 'TopologyGridController', ($scope, $resource, $timeout)->
 
-window.TopologyGridController = ($scope, $resource, $timeout)->
+	$scope.f = ()->alert('abc')
 
 	Topologies = $resource('/apiproxy/topologies')
 	refreshTopology = ()-> Topologies.get( {}, success, failure ) 
@@ -64,6 +65,8 @@ window.TopologyGridController = ($scope, $resource, $timeout)->
 		$scope.originalTopology = {}
 
 window.ModalEditTopologyController = ($scope, $window, $resource,$q)->
+	$scope.alerts = []
+
 	$scope.close = ()-> 
 		# hack for issues with closing dialogs. WIP by angular-ui team 
 		# https://github.com/angular-ui/bootstrap/issues/441
@@ -80,8 +83,11 @@ window.ModalEditTopologyController = ($scope, $window, $resource,$q)->
 			{name:$scope.topologyToEdit.name, description: $scope.topologyToEdit})
 		Topologies.save {definition : $scope.topologyToEdit.pattern},
 			()->$scope.close(),
-			()->$scope.close()
-
+			(response)->
+				if (response && response.data && response.data.error_message)
+					error(response.data.error_message)
+				else
+					error("Operation failed - no error message available")
 	doEdit = ()->	
 		operations = []
 		if $scope.originalTopology.name != $scope.topologyToEdit.name
@@ -94,3 +100,10 @@ window.ModalEditTopologyController = ($scope, $window, $resource,$q)->
 			operations.push Topology.put(null).$promise
 
 		$q.all(operations).then($scope.close)
+
+	$scope.closeAlert = (index)->$scope.alerts.splice(index, 1)
+
+	success = (msg)->$scope.alerts.push({type:'success', msg:msg})
+	error = (msg)->$scope.alerts.push({type:'error', msg:msg})
+
+
