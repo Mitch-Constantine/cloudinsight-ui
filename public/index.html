@@ -1,96 +1,113 @@
+<!DOCTYPE html>
 <html ng-app="cloudInsightUI">
 	<head>
 		<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
 
-		<link rel="stylesheet" href="css/cloudInsight.css" type="text/css" media="screen, projection">
-	
 		<script src="js/jquery-2.0.3.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular-resource.js"></script>
 		<script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
 		<script src="js/ngUpload.js"></script>
 		<script src="js/ui-bootstrap-0.4.0.js"></script>
-		<script src="coffee/TopologyGridController.js"></script>
 		<script src="js/ui-bootstrap-tpls-0.4.0.js"></script>
+		<script src="coffee/TopologyGridController.js"></script>
 	</head>
 	<body ng-controller="TopologyGridController">
+
 		<div class="container">
 			<h1>CloudInsight UI</h1>
-			<div class="error" ng-show="failed">Error contacting server</div>
-			<button ng-click="newTopology()" class="btn">New</button>
-			<button ng-click="deleteTopology()" class="btn">Delete</button>
-			<button ng-click="deployTopology()" class="btn">Deploy</button>
-			<button ng-click="undeployTopology()" class="btn">Undeploy</button>
-			<button ng-click="repairTopology()" class="btn">Repair</button>
-			<table>
-				<tr ng-repeat="topology in topologies">
-					<td><input type="checkbox" ng-model="topology.checked"/></td>
-					<td>
-						<img ng-show="topology.error" src="images/errorIcon.png" title="{{topology.error}}"></img>
-						<a ng-click="rename(topology)" href="#">{{topology.name}}  {{topology.status}}</a>
-					</td>
-				</tr>
-			</table>
+
+			<br/>
+
+			<div class="row">
+				<div class="span2">
+					<tabset vertical="true" type="'pills'">
+						<tab heading="Topologies"></tab>
+						<tab heading="Next Module"></tab>
+							<!--<img src="http://www.trafficpolicemumbai.org/marathi/marimage/website_under_construction.gif">-->
+						</tab>				
+					</tabset>
+				</div>
+				<div class="span10">
+					<div class="error" ng-show="failed">Error contacting server</div>
+					<button ng-click="newTopology()" class="btn">New</button>
+					<button ng-click="deleteTopology()" class="btn">Delete</button>
+					<button ng-click="deployTopology()" class="btn">Deploy</button>
+					<button ng-click="undeployTopology()" class="btn">Undeploy</button>
+					<button ng-click="repairTopology()" class="btn">Repair</button>
+					
+					<br/>
+					<br/>
+
+					<table class="table table-bordered">
+						<tr ng-repeat="topology in topologies">
+							<td><input type="checkbox" ng-model="topology.checked"></td>
+							<td>
+								<img ng-show="topology.error" src="images/errorIcon.png" title="{{topology.error}}">
+								<a ng-click="rename(topology)" href="#">{{topology.name}}  {{topology.status}}</a>
+							</td>
+						</tr>
+					</table>
+
+					<div ng-controller="ModalEditTopologyController">
+
+					    <div modal="topologyToEdit" close="close()" options="opts">
+					        <div class="modal-header">
+					            <h3>Edit topology</h3>
+					        </div>
+					        <div class="modal-body">
+								<div>
+								  <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+								</div>
+
+					        	<form class="form-horizontal content">
+					        		<div class="control-group">
+										<label class="control-label" for="inputName">Name</label>
+										<div class="controls">
+											<input type="text" id="inputName" ng-model="topologyToEdit.name">
+										</div>
+									</div>
+					        		<div class="control-group">
+										<label class="control-label" for="inputDescription">Description</label>
+										<div class="controls">
+											<input type="text" id="inputDescription" ng-model="topologyToEdit.description">
+										</div>
+									</div>
+					        		<div class="control-group">
+										<label class="control-label" for="inputDefinition">Definition</label>
+										<div class="controls">
+											<textarea id="inputDefinition" ng-model="topologyToEdit.pattern" rows="7" cols="40" ng-readonly="!topologyToEdit.isNew"></textarea>
+										</div>
+									</div>
+			 		        	</form>
+			 		        	<hr/>
+								<form action="/apiproxy/uploaded_files?file_type=war_file" ng-upload class="form-horizontal"> 
+			 		        		<div class="control-group">
+										<label class="control-label" for="inputName">War file:</label>
+										<div class="controls">
+										 	<input type="file" name="file"></input>
+			      							<input type="submit" value="Upload" upload-submit="uploadComplete(content, completed)"></input>
+			      						</div>
+			      					</div>
+			    				</form>
+			 					<form action="/apiproxy/uploaded_files?file_type=sql_script_file" ng-upload class="form-horizontal"> 
+			 		        		<div class="control-group">
+										<label class="control-label" for="inputName">Sql file:</label>
+										<div class="controls">
+										 	<input type="file" name="file"></input>
+			      							<input type="submit" value="Upload" upload-submit="uploadComplete(content, completed)"></input>
+			      						</div>
+			      					</div>
+			    				</form>   				
+					        </div>
+					        <div class="modal-footer">
+					            <button class="btn btn-primary" ng-click="save()">Save</button>
+					            <button class="btn" ng-click="close()">Cancel</button>
+					        </div>
+					    </div>
+					</div>
+				</div>
+			</div>
 		</div>
-
-			<div ng-controller="ModalEditTopologyController">
-
-			    <div modal="topologyToEdit" close="close()" options="opts">
-			        <div class="modal-header">
-			            <h3>Edit topology</h3>
-			        </div>
-			        <div class="modal-body">
-						<div>
-						  <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
-						</div>
-
-			        	<form class="form-horizontal">
-			        		<div class="control-group">
-								<label class="control-label" for="inputName">Name</label>
-								<div class="controls">
-									<input type="text" id="inputName" ng-model="topologyToEdit.name">
-								</div>
-							</div>
-			        		<div class="control-group">
-								<label class="control-label" for="inputDescription">Description</label>
-								<div class="controls">
-									<input type="text" id="inputDescription" ng-model="topologyToEdit.description">
-								</div>
-							</div>
-			        		<div class="control-group">
-								<label class="control-label" for="inputDefinition">Definition</label>
-								<div class="controls">
-									<textarea id="inputDefinition" ng-model="topologyToEdit.pattern" rows="7" cols="40" ng-readonly="!topologyToEdit.isNew"></textarea>
-								</div>
-							</div>
-	 		        	</form>
-	 		        	<hr/>
-						<form action="/apiproxy/uploaded_files?file_type=war_file" ng-upload class="form-horizontal"> 
-	 		        		<div class="control-group">
-								<label class="control-label" for="inputName">War file:</label>
-								<div class="controls">
-								 	<input type="file" name="file"></input>
-	      							<input type="submit" value="Upload" upload-submit="uploadComplete(content, completed)"></input>
-	      						</div>
-	      					</div>
-	    				</form>
-	 					<form action="/apiproxy/uploaded_files?file_type=sql_script_file" ng-upload class="form-horizontal"> 
-	 		        		<div class="control-group">
-								<label class="control-label" for="inputName">Sql file:</label>
-								<div class="controls">
-								 	<input type="file" name="file"></input>
-	      							<input type="submit" value="Upload" upload-submit="uploadComplete(content, completed)"></input>
-	      						</div>
-	      					</div>
-	    				</form>   				
-			        </div>
-			        <div class="modal-footer">
-			            <button class="btn btn-primary" ng-click="save()">Save</button>
-			            <button class="btn" ng-click="close()">Cancel</button>
-			        </div>
-			    </div>
-			 <div>
-		</div>
-
 	</body>
 </html>

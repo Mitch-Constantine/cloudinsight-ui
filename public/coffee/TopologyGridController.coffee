@@ -84,10 +84,7 @@ window.ModalEditTopologyController = ($scope, $window, $resource,$q)->
 		Topologies.save {definition : $scope.topologyToEdit.pattern},
 			()->$scope.close(),
 			(response)->
-				if (response && response.data && response.data.error_message)
-					error(response.data.error_message)
-				else
-					error("Operation failed - no error message available")
+				error response?.data?.error_message or "Operation failed - no error message available"
 	doEdit = ()->	
 		operations = []
 		if $scope.originalTopology.name != $scope.topologyToEdit.name
@@ -106,4 +103,11 @@ window.ModalEditTopologyController = ($scope, $window, $resource,$q)->
 	success = (msg)->$scope.alerts.push({type:'success', msg:msg})
 	error = (msg)->$scope.alerts.push({type:'error', msg:msg})
 
-
+	$scope.uploadComplete = (response, isComplete) -> 
+		if !isComplete
+			return
+		
+		if response.id
+			success "File was successfully uploaded"
+		else
+			error( response?.error_message or "Upload failed - no error message available" )
