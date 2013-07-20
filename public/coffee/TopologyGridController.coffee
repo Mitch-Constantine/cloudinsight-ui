@@ -1,16 +1,17 @@
-angular.module('cloudInsightUI', ['ngResource', 'ui.bootstrap', 'ngUpload'])
-.controller 'TopologyGridController', ($scope, $resource, $timeout)->
+app = angular.module('cloudInsightUI', ['ngResource', 'ui.bootstrap', 'ngUpload', 'ngGrid'])
 
-	$scope.f = ()->alert('abc')
+app.controller 'TopologyGridController', ($scope, $resource, $timeout)->
 
 	Topologies = $resource('/apiproxy/topologies')
 	refreshTopology = ()-> Topologies.get( {}, success, failure ) 
 
 	success =  (data)->
-		transferSelection(data.all, $scope.topologies)
-		$scope.topologies = data.all
+		if changed( $scope.topologies, data.all)
+			$scope.topologies = data.all
 		$scope.failed = false
 		reschedule()
+
+	changed = (first, second) -> JSON.stringify(first) != JSON.stringify(second)
 
 	failure = ()->
 		$scope.failed = true
@@ -18,17 +19,15 @@ angular.module('cloudInsightUI', ['ngResource', 'ui.bootstrap', 'ngUpload'])
 
 	reschedule = ()->$timeout(refreshTopology, 3000)
 
-	transferSelection = (newData, oldData) ->
-		_.each newData, (topology) ->
-			if oldData
-				oldTopology = _.findWhere(oldData, {id : topology.id})
-				topology.checked = oldTopology && oldTopology.checked
-				topology.error = oldTopology && oldTopology.error
-			else
-				topology.checked = false
-				topology.error = null
-
 	refreshTopology()
+
+	$scope.gridOptions = {
+		data : 'topologies',
+		columnDefs: [{field:'name', displayName:'Name'}],
+		showSelectionCheckbox : true,
+		selectWithCheckboxOnly : true,
+		selectedItems : []
+	}
 
 	$scope.deleteTopology = ()->
 		_.each getSelectedIds(), (id)->
@@ -52,7 +51,7 @@ angular.module('cloudInsightUI', ['ngResource', 'ui.bootstrap', 'ngUpload'])
 
 
 	getSelectedIds = ()->
-		selectedTopologies = _.where($scope.topologies, {checked : true})
+		selectedTopologies = $scope.gridOptions.selectedItems
 		selectedIds = _.pluck(selectedTopologies, "id")
 
 
@@ -64,7 +63,7 @@ angular.module('cloudInsightUI', ['ngResource', 'ui.bootstrap', 'ngUpload'])
 		$scope.topologyToEdit = {isNew : true}
 		$scope.originalTopology = {}
 
-window.ModalEditTopologyController = ($scope, $window, $resource,$q)->
+app.controller 'ModalEditTopologyController', ($scope, $window, $resource,$q)->
 	$scope.alerts = []
 
 	$scope.close = ()-> 

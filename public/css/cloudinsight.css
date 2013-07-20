@@ -1,26 +1,5 @@
-.container {
-	width: 950px;
-}
-
-}
-.info, .success, .warning, .error, .validation {
-	border: 1px solid;
-	margin: 10px 0px;
-	padding:15px 10px 15px 15px;
-}
-.info {
-	color: #00529B;
-	background-color: #BDE5F8;
-}
-.success {
-	color: #4F8A10;
-	background-color: #DFF2BF;
-}
-.warning {
-	color: #9F6000;
-	background-color: #FEEFB3;
-}
-.error {
-	color: #D8000C;
-	background-color: #FFBABA;
+.gridStyle {
+    border: 1px solid rgb(212,212,212);
+    width: auto; 
+    height: 300px
 }

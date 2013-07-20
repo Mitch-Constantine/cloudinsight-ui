@@ -2,6 +2,8 @@
 <html ng-app="cloudInsightUI">
 	<head>
 		<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+		<link href="css/ng-grid.css" rel="stylesheet">
+		<link href="css/cloudinsight.css" rel="stylesheet">
 
 		<script src="js/jquery-2.0.3.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
@@ -10,6 +12,7 @@
 		<script src="js/ngUpload.js"></script>
 		<script src="js/ui-bootstrap-0.4.0.js"></script>
 		<script src="js/ui-bootstrap-tpls-0.4.0.js"></script>
+		<script src="js/ng-grid-2.0.7.debug.js"></script>
 		<script src="coffee/TopologyGridController.js"></script>
 	</head>
 	<body ng-controller="TopologyGridController">
@@ -30,6 +33,7 @@
 				</div>
 				<div class="span10">
 					<div class="error" ng-show="failed">Error contacting server</div>
+					
 					<button ng-click="newTopology()" class="btn">New</button>
 					<button ng-click="deleteTopology()" class="btn">Delete</button>
 					<button ng-click="deployTopology()" class="btn">Deploy</button>
@@ -39,16 +43,8 @@
 					<br/>
 					<br/>
 
-					<table class="table table-bordered">
-						<tr ng-repeat="topology in topologies">
-							<td><input type="checkbox" ng-model="topology.checked"></td>
-							<td>
-								<img ng-show="topology.error" src="images/errorIcon.png" title="{{topology.error}}">
-								<a ng-click="rename(topology)" href="#">{{topology.name}}  {{topology.status}}</a>
-							</td>
-						</tr>
-					</table>
-
+					<div ng-grid="gridOptions" class="gridStyle"></div>
+		
 					<div ng-controller="ModalEditTopologyController">
 
 					    <div modal="topologyToEdit" close="close()" options="opts">
