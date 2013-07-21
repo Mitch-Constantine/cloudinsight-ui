@@ -12,8 +12,25 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout)->
 	success =  (data)->
 		if changed( $scope.topologies, data.all)
 			$scope.topologies = data.all
+			setAppUrl()
+			rebuildSelectedItems()
 		hideUnableToConnect()
 		reschedule()
+
+	setAppUrl = ()->
+		_.each $scope.topologies, (topology)->
+			applications = topology?.deployment?.applications
+			if applications 
+				appWithUrl = _.find applications, (app)->app.url
+				if appWithUrl
+					topology.appUrl = appWithUrl.url
+
+	rebuildSelectedItems = ()->
+		oldSelection = _.clone( $scope.gridOptions.selectedItems )
+		$scope.gridOptions.selectedItems.length = 0
+		for row, index in $scope.topologies
+			if _.findWhere(oldSelection, {id:row.id})
+				$scope.gridOptions.selectedItems.push(row)
 
 	changed = (first, second) -> JSON.stringify(first) != JSON.stringify(second)
 
@@ -27,36 +44,37 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout)->
 
 	$scope.gridOptions = {
 		data : 'topologies',
-		columnDefs: [{field:'name', displayName:'Name'}],
+		columnDefs: [
+			{field:'id', displayName:'Id', width:50},
+			{field:'name', displayName:'Name'},
+			{field:'nodes.length', displayName:'Nodes', width:100},
+			{field:'appUrl', displayName:'Application URL', 
+			cellTemplate:"<div class=\"ngCellText colt{{$index}}\"><a href='{{row.getProperty(col.field)}}' target='_blank'>{{row.getProperty(col.field)}}</a></div>" }
+		],
 		showSelectionCheckbox : true,
 		selectWithCheckboxOnly : true,
 		selectedItems : []
 	}
 
 	$scope.deleteTopology = ()->
-		_.each getSelectedIds(), (id)->
-			Topology = $resource('/apiproxy/topologies/:id', {id:id})
+		_.each $scope.gridOptions.selectedItems, (topology)->
+			Topology = $resource('/apiproxy/topologies/:id', {id:topology.id})
 			Topology.delete()
 
-	$scope.deployTopology = ()-> performMassOperation('deploy')
-	$scope.undeployTopology = ()-> performMassOperation('undeploy')
-	$scope.repairTopology = ()-> performMassOperation('repair')
+	$scope.deployTopology = ()-> performMassOperation('deploy', 'Deploy')
+	$scope.undeployTopology = ()-> performMassOperation('undeploy', 'Undeploy')
+	$scope.repairTopology = ()-> performMassOperation('repair', 'Repair')
 
-	performMassOperation = (operation)->
-		_.each $scope.topologies, (topology)->topology.error = null
-		_.each getSelectedIds(), (id)->
-			Topology = $resource('/apiproxy/topologies/:id?operation=:operation', {id:id, operation:operation}, {put : {method : "PUT"}})
+	performMassOperation = (operation, operationName)->
+		_.each $scope.gridOptions.selectedItems, (topology)->
+			prefix = operationName + ' ' + topology.name + ': '
+			warn(prefix + 'Operation started')
+			Topology = $resource('/apiproxy/topologies/:id?operation=:operation', {id:topology.id, operation:operation}, {put : {method : "PUT"}})
 			Topology.put(null,
-					->,
+					->message_success(prefix + 'Operation successful'),
 					(response)->
 						error(response?.data?.error_message or "Operation failed - no error message available")
 				)
-
-
-	getSelectedIds = ()->
-		selectedTopologies = $scope.gridOptions.selectedItems
-		selectedIds = _.pluck(selectedTopologies, "id")
-
 
 	$scope.rename = (topology)-> 
 		$scope.topologyToEdit = topology
@@ -68,6 +86,8 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout)->
 
 	$scope.closeAlert = (index)->$scope.main_alerts.splice(index, 1)
 	error = (msg)->$scope.main_alerts.push({type:'error', msg:msg})
+	message_success = (msg)->$scope.main_alerts.push({type:'success', msg:msg})
+	warn = (msg)->$scope.main_alerts.push({msg:msg})
 	hideUnableToConnect = ()-> if (isCantConnectDisplayed()) then $scope.closeAlert(0)
 	displayUnableToConnect = ()-> unless(isCantConnectDisplayed()) then $scope.main_alerts.splice(0, 0, cantConnectError)
 
@@ -112,9 +132,11 @@ app.controller 'ModalEditTopologyController', ($scope, $window, $resource,$q)->
 
 	success = (msg)->$scope.alerts.push({type:'success', msg:msg})
 	error = (msg)->$scope.alerts.push({type:'error', msg:msg})
+	warn = (msg)->$scope.alerts.push({msg:msg})
 
 	$scope.uploadComplete = (response, isComplete) -> 
 		if !isComplete
+			warn('Upload started')
 			return
 		
 		if response.id
