@@ -2,19 +2,21 @@ app = angular.module('cloudInsightUI', ['ngResource', 'ui.bootstrap', 'ngUpload'
 
 app.controller 'TopologyGridController', ($scope, $resource, $timeout)->
 
+	$scope.main_alerts = []
+
 	Topologies = $resource('/apiproxy/topologies')
 	refreshTopology = ()-> Topologies.get( {}, success, failure ) 
 
 	success =  (data)->
 		if changed( $scope.topologies, data.all)
 			$scope.topologies = data.all
-		$scope.failed = false
+		hideUnableToConnect()
 		reschedule()
 
 	changed = (first, second) -> JSON.stringify(first) != JSON.stringify(second)
 
 	failure = ()->
-		$scope.failed = true
+		displayUnableToConnect()
 		reschedule()
 
 	reschedule = ()->$timeout(refreshTopology, 3000)
@@ -45,8 +47,7 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout)->
 			Topology.put(null,
 					->,
 					(response)->
-						topology = _.findWhere $scope.topologies, {id:id}
-						topology.error = response.data.error_message
+						error(response?.data?.error_message or "Operation failed - no error message available")
 				)
 
 
@@ -62,6 +63,14 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout)->
 	$scope.newTopology = ()->
 		$scope.topologyToEdit = {isNew : true}
 		$scope.originalTopology = {}
+
+	$scope.closeAlert = (index)->$scope.main_alerts.splice(index, 1)
+	error = (msg)->$scope.main_alerts.push({type:'error', msg:msg})
+	hideUnableToConnect = ()-> if (isCantConnectDisplayed()) then $scope.closeAlert(0)
+	displayUnableToConnect = ()-> unless(isCantConnectDisplayed()) then $scope.main_alerts.splice(0, 0, cantConnectError)
+
+	isCantConnectDisplayed = ()->$scope.main_alerts[0] == cantConnectError
+	cantConnectError = {type: 'error', msg: 'Connection to server was lost'}
 
 app.controller 'ModalEditTopologyController', ($scope, $window, $resource,$q)->
 	$scope.alerts = []

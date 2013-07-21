@@ -32,7 +32,9 @@
 					</tabset>
 				</div>
 				<div class="span10">
-					<div class="error" ng-show="failed">Error contacting server</div>
+					<div>
+					  <alert ng-repeat="alert in main_alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+					</div>
 					
 					<button ng-click="newTopology()" class="btn">New</button>
 					<button ng-click="deleteTopology()" class="btn">Delete</button>
