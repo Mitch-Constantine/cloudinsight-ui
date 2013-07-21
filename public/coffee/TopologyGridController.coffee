@@ -46,7 +46,8 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout)->
 		data : 'topologies',
 		columnDefs: [
 			{field:'id', displayName:'Id', width:50},
-			{field:'name', displayName:'Name'},
+			{field:'name', displayName:'Name',
+			cellTemplate:"<div class=\"ngCellText\" ng-class=\"col.colIndex()\"><span ng-cell-text><a ng-click=\"rename(row.entity)\">{{row.getProperty(col.field)}}</a></span></div>"},
 			{field:'nodes.length', displayName:'Nodes', width:100},
 			{field:'appUrl', displayName:'Application URL', 
 			cellTemplate:"<div class=\"ngCellText colt{{$index}}\"><a href='{{row.getProperty(col.field)}}' target='_blank'>{{row.getProperty(col.field)}}</a></div>" }
