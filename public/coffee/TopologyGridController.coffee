@@ -4,6 +4,8 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout)->
 
 	$scope.main_alerts = []
 
+	$scope.config = $resource('/config').get()
+
 	Topologies = $resource('/apiproxy/topologies')
 	refreshTopology = ()-> Topologies.get( {}, success, failure ) 
 
