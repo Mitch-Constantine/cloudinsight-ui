@@ -1,0 +1,24 @@
+{
+  "name": "bower",
+  "version": "0.0.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-ui-ace": "~0.0.3",
+    "ngUpload": "~0.3.11",
+    "ng-grid": "~2.0.7",
+    "angular-ui": "~0.4.0",
+    "bootstrap": "~2.3.2",
+    "angular-resource": "~1.0.7",
+    "underscore": "~1.5.1",
+    "angular-ui-bootstrap": "~0.4.0",
+    "angular-bootstrap": "~0.4.0",
+    "bower-bootstrap-css": "latest"
+  }
+}
