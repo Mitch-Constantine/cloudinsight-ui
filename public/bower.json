@@ -19,6 +19,7 @@
     "underscore": "~1.5.1",
     "angular-ui-bootstrap": "~0.4.0",
     "angular-bootstrap": "~0.4.0",
-    "bower-bootstrap-css": "latest"
+    "bower-bootstrap-css": "latest",
+    "google-code-prettify": "~1.0.0"
   }
 }

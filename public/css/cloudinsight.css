@@ -6,7 +6,15 @@
     height:100%;
 }
 
-.container { height: 100%;position:relative; }
+.ace_editor { top: 0; bottom: 0; right: 0; left: 0; }
+.ace_editor_wrapper { position : relative; height: 200px}
 
-html {min-height:100%;position:relative}/* make sure it is at least as tall as the viewport */
-body {height:100%;position:relative;}
+
+.deployed, .deployed a { color : green }
+.deploying, .deploying a { color : blue }
+.undeployed, .undeployed a {color : black }
+.failed, .failed a { color : red }
+
+.deployed a, .deploying a, .undeployed a, .failed a { text-decoration:underline; }
+
+

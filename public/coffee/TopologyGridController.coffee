@@ -1,4 +1,4 @@
-app = angular.module('cloudInsightUI', ['ngResource', 'ui.bootstrap', 'ngUpload', 'ngGrid'])
+app = angular.module('cloudInsightUI', ['ngResource', 'ui.bootstrap', 'ngUpload', 'ngGrid', 'ui.ace'])
 
 app.controller 'TopologyGridController', ($scope, $resource, $timeout)->
 
@@ -14,8 +14,18 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout)->
 			$scope.topologies = data.all
 			setAppUrl()
 			rebuildSelectedItems()
+			formatPattern(data.all)
+			setRowStatus(data.all)
 		hideUnableToConnect()
 		reschedule()
+
+	setRowStatus = (all)->
+		for topology in all
+			topology.status = topology?.deployment?.status
+
+	formatPattern = (all)->
+		for topology in all
+			topology.pattern = formatXml(topology.pattern) if topology.pattern
 
 	setAppUrl = ()->
 		_.each $scope.topologies, (topology)->
@@ -47,14 +57,31 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout)->
 		columnDefs: [
 			{field:'id', displayName:'Id', width:50},
 			{field:'name', displayName:'Name',
-			cellTemplate:"<div class=\"ngCellText\" ng-class=\"col.colIndex()\"><span ng-cell-text><a ng-click=\"rename(row.entity)\">{{row.getProperty(col.field)}}</a></span></div>"},
+			cellTemplate:
+				"""<div class=\"ngCellText\" ng-class=\"col.colIndex()\">
+					<span ng-cell-text>
+						<img src='images/erroricon.png' " 
+						     style='display:block;float:right' 
+						     ng-show='row.getProperty(\"deployment.status\")==\"failed\"' 
+						     title='{{row.getProperty(deployment.error)}}'>
+						<a ng-click=\"rename(row.entity)\">{{row.getProperty(col.field)}}</a>
+					</span>
+				</div>"""},
 			{field:'nodes.length', displayName:'Nodes', width:100},
 			{field:'appUrl', displayName:'Application URL', 
 			cellTemplate:"<div class=\"ngCellText colt{{$index}}\"><a href='{{row.getProperty(col.field)}}' target='_blank'>{{row.getProperty(col.field)}}</a></div>" }
 		],
 		showSelectionCheckbox : true,
 		selectWithCheckboxOnly : true,
-		selectedItems : []
+		showColumnMenu : true,
+		showFilter : true,
+		selectedItems : [],
+		enableColumnResize : true,
+		enableColumnReordering : true,
+		rowTemplate:'<div style="height: 100%" ng-class="row.getProperty(\'deployment.status\')"><div ng-style="{ \'cursor\': row.cursor }" ng-repeat="col in renderedColumns" ng-class="col.colIndex()" class="ngCell ">' +
+                           '<div class="ngVerticalBar" ng-style="{height: rowHeight}" ng-class="{ ngVerticalBarVisible: !$last }"> </div>' +
+                           '<div ng-cell></div>' +
+                     '</div></div>'		
 	}
 
 	$scope.deleteTopology = ()->
@@ -111,7 +138,7 @@ app.controller 'ModalEditTopologyController', ($scope, $window, $resource,$q)->
 
 	createNew = ()->
 		Topologies = $resource('/apiproxy/topologies?name=:name&description=:description', 
-			{name:$scope.topologyToEdit.name, description: $scope.topologyToEdit})
+			{name:$scope.topologyToEdit.name ? "", description: $scope.topologyToEdit.description ? ""})
 		Topologies.save {definition : $scope.topologyToEdit.pattern},
 			()->$scope.close(),
 			(response)->
@@ -135,6 +162,10 @@ app.controller 'ModalEditTopologyController', ($scope, $window, $resource,$q)->
 	error = (msg)->$scope.alerts.push({type:'error', msg:msg})
 	warn = (msg)->$scope.alerts.push({msg:msg})
 
+	$scope.$watch 'topologyToEdit', ()->
+		if $scope.aceEditor
+			$scope.aceEditor.setReadOnly !topologyToEdit.isNew
+
 	$scope.uploadComplete = (response, isComplete) -> 
 		if !isComplete
 			warn('Upload started')
@@ -142,5 +173,36 @@ app.controller 'ModalEditTopologyController', ($scope, $window, $resource,$q)->
 		
 		if response.id
 			success "File was successfully uploaded"
-		else
+		else 
 			error( response?.error_message or "Upload failed - no error message available" )
+
+
+# From https://gist.github.com/sente/1083506 (reformatted to CoffeeScript)
+formatXml = (xml)->
+	formatted = ''
+	xml=xml.replace(/\r\n/g, " ")
+	reg = /(>)(\s*)(<)(\/*)/g
+	xml = xml.replace(reg, '$1\r\n$3$4');
+	pad = 0
+
+	jQuery.each xml.split('\r\n'), (index, node) ->
+		indent = 0
+		if node.match( /.+<\/\w[^>]*>$/ )
+			indent = 0
+		else if node.match( /^<\/\w/ )
+			if pad != 0
+				pad -= 1
+		else if node.match( /^<\w[^>]*[^\/]>.*$/ )
+			indent = 1
+		else 
+			indent = 0		
+		 
+		padding = ''
+		if pad > 0 # Range one line below reverses direction if pad=0!
+			for i in [1..pad]
+				padding += '    '
+	 
+		formatted += padding + node + '\r\n'
+		pad += indent;
+	 
+	return formatted;
