@@ -151,7 +151,7 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout, $cookieSt
                 """<div class=\"ngCellText\" ng-class=\"col.colIndex()\">
                     <span ng-cell-text>
                         <div class='pull-right'>
-                            <img src='images/erroricon.png' 
+                            <img src='images/errorIcon.png' 
                                  ng-show='row.getProperty(\"deployment.status\")==\"failed\"' 
                                  title='{{row.getProperty(\"deployment.error\")}}'>
                             <span ng-show='row.getProperty(\"deployment.status\")==\"deploying\"'>
