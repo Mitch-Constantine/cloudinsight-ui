@@ -84,11 +84,25 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout, $cookieSt
             showCurrentPage()       
     , true)
 
+    oldSortName = ""
+    oldSortDirection = ""
+    $scope.$on 'ngGridEventSorted', (ev, sortedColumn)->
+        newSortName = sortedColumn.fields?[0]
+        newSortDirection = sortedColumn.directions?[0]
+
+        if newSortName != oldSortName or newSortDirection != oldSortDirection
+            $scope.pagingOptions.currentPage = 1
+            oldSortName = newSortName
+            oldSortDirection = newSortDirection
+            showCurrentPage() 
+
     $scope.currentPage = []
 
     showCurrentPage = ()->
         return unless $scope.topologies
-        filteredTopologies = performFiltering($scope.topologies)
+
+        sortedTopologies = performSorting($scope.topologies)
+        filteredTopologies = performFiltering(sortedTopologies)
         $scope.totalTopologies = filteredTopologies.length
         $scope.currentPage.splice(0, $scope.currentPage.length)
         startIndex = $scope.pagingOptions.pageSize * ($scope.pagingOptions.currentPage-1)
@@ -97,12 +111,23 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout, $cookieSt
             $scope.pagingOptions.currentPage = 1
         for i in [1..Math.min($scope.pagingOptions.pageSize, $scope.totalTopologies-startIndex)]
             $scope.currentPage.push(filteredTopologies[startIndex + i-1])
-        $scope.$digest() unless $scope.$$phase
+        $scope.currentPage = _.clone($scope.currentPage)
+
+    performSorting = (topologies)->
+        sortField = oldSortName
+        return topologies unless sortField
+
+        sortFunction = parseFilter(sortField)
+        return topologies unless sortFunction
+
+        sorted = _.sortBy(topologies, sortFunction)
+        if oldSortDirection == "desc"
+            sorted.reverse()
+        return sorted
 
     performFiltering  = (topologies)-> 
         return topologies unless $scope.filterText
-
-        parsedFilter = parseFilter()
+        parsedFilter = parseFilter($scope.filterText)
         return if parsedFilter then (topology for topology in topologies when satisfiesFilter(parsedFilter, topology)) else topologies
 
     satisfiesFilter = (filter, topology)->
@@ -111,9 +136,9 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout, $cookieSt
         catch e
             false
 
-    parseFilter = ()->
+    parseFilter = (expr)->
         try
-            $parse($scope.filterText)
+            $parse(expr)
         catch e
             null               
 
@@ -126,9 +151,9 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout, $cookieSt
                 """<div class=\"ngCellText\" ng-class=\"col.colIndex()\">
                     <span ng-cell-text>
                         <div class='pull-right'>
-                            <img src='images/erroricon.png' " 
+                            <img src='images/erroricon.png' 
                                  ng-show='row.getProperty(\"deployment.status\")==\"failed\"' 
-                                 title='{{row.getProperty(deployment.error)}}'>
+                                 title='{{row.getProperty(\"deployment.error\")}}'>
                             <span ng-show='row.getProperty(\"deployment.status\")==\"deploying\"'>
                                 [Deploying {{deployment_time(row.getProperty(\"id\"))|date:'mm:ss'}}....]
                             </span>
@@ -152,6 +177,7 @@ app.controller 'TopologyGridController', ($scope, $resource, $timeout, $cookieSt
         plugins: [new ngGridFlexibleHeightPlugin()],
         enableColumnResize : true,
         enableColumnReordering : true,
+        useExternalSorting : true,
         rowTemplate:'<div style="height: 100%" ng-class="row.getProperty(\'deployment.status\')"><div ng-style="{ \'cursor\': row.cursor }" ng-repeat="col in renderedColumns" ng-class="col.colIndex()" class="ngCell ">' +
                            '<div class="ngVerticalBar" ng-style="{height: rowHeight}" ng-class="{ ngVerticalBarVisible: !$last }"> </div>' +
                            '<div ng-cell></div>' +
