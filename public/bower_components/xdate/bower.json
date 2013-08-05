@@ -1,0 +1,9 @@
+{
+  "name": "xdate",
+  "version": "0.0.0",
+  "commit": "7af77b9756361bbdbd8d70aa9edffa2b7028f990",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/arshaw/xdate"
+  }
+}

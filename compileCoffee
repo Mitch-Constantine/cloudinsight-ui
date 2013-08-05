@@ -1,0 +1,5 @@
+directory=`pwd`
+cd ~/projects/cloudinsight-ui/public/coffee
+coffee -c TopologyGridController.coffee
+rm *.js
+cd $directory

@@ -7,6 +7,7 @@
 
 		<script src="bower_components/jquery/jquery.js"></script>
 		<script src="bower_components/angular/angular.js"></script>
+		<script src="bower_components/angular-cookies/angular-cookies.js"></script>
 		<script src="bower_components/angular-resource/angular-resource.js"></script>
 		<script src="bower_components/angular-ui/build/angular-ui.js"></script>
 		<script src="bower_components/underscore/underscore.js"></script>
@@ -14,8 +15,10 @@
 		<script src="bower_components/angular-ui/build/angular-ui.js"></script>
 		<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 		<script src="bower_components/ng-grid/ng-grid-2.0.7.debug.js"></script>
+		<script src="bower_components/ng-grid/plugins/ng-grid-flexible-height.js"></script>		 	
 		<script type="text/javascript" src="bower_components/ace-builds/src-min-noconflict/ace.js"></script>		
 		<script src="bower_components/angular-ui-ace/ui-ace.js"></script>
+		<script src="bower_components/xdate/src/xdate.js"></script>
 
 		<script type="text/javascript" src="bower_components/google-code-prettify/src/prettify.js"></script>
 
@@ -56,7 +59,11 @@
 					<br/>
 
 					<div ng-grid="gridOptions" class="gridStyle"></div>
-		
+					<br/>
+					<div class="pull-left">
+						Search: <input type="text" id="search" ng-model="filterText">
+					</div>
+
 					<div ng-controller="ModalEditTopologyController">
 
 					    <div modal="topologyToEdit" close="close()" options="opts">
