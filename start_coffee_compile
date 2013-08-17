@@ -1,0 +1,1 @@
+coffee -wc -o public/js public/coffee

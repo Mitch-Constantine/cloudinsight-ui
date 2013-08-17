@@ -8,12 +8,6 @@ describe "Sinatra App" do
     last_response.body.should include('CloudInsight UI')
   end
 
-  it "Coffeescript files are translated" do
-    get '/coffee/test.js'
-    last_response.should be_ok
-    last_response.body.should include 'alert("Test message")'
-  end
-
   it "returns configuration on /config" do
     get '/config'
     last_response.should be_ok

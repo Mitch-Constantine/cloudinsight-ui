@@ -1,34 +1,44 @@
 <!DOCTYPE html>
 <html ng-app="cloudInsightUI">
 	<head>
-		<link href="bower_components/bower-bootstrap-css/bootstrap.css" rel="stylesheet">
-		<link href="bower_components/ng-grid/ng-grid.css" rel="stylesheet">
+		<link href="components/bower-bootstrap-css/bootstrap.css" rel="stylesheet">
+		<link href="components/ng-grid/ng-grid.css" rel="stylesheet">
 		<link href="css/cloudinsight.css" rel="stylesheet">
 
-		<script src="bower_components/jquery/jquery.js"></script>
-		<script src="bower_components/angular/angular.js"></script>
-		<script src="bower_components/angular-cookies/angular-cookies.js"></script>
-		<script src="bower_components/angular-resource/angular-resource.js"></script>
-		<script src="bower_components/angular-ui/build/angular-ui.js"></script>
-		<script src="bower_components/underscore/underscore.js"></script>
-		<script src="bower_components/ngUpload/ng-upload.js"></script>
-		<script src="bower_components/angular-ui/build/angular-ui.js"></script>
-		<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
-		<script src="bower_components/ng-grid/ng-grid-2.0.7.debug.js"></script>
-		<script src="bower_components/ng-grid/plugins/ng-grid-flexible-height.js"></script>		 	
-		<script type="text/javascript" src="bower_components/ace-builds/src-min-noconflict/ace.js"></script>		
-		<script src="bower_components/angular-ui-ace/ui-ace.js"></script>
-		<script src="bower_components/xdate/src/xdate.js"></script>
+		<script src="components/jquery/jquery.js"></script>
+		<script src="components/angular/angular.js"></script>
+		<script src="components/angular-cookies/angular-cookies.js"></script>
+		<script src="components/angular-resource/angular-resource.js"></script>
+		<script src="components/angular-ui/build/angular-ui.js"></script>
+		<script src="components/underscore/underscore.js"></script>
+		<script src="components/ngUpload/ng-upload.js"></script>
+		<script src="components/angular-ui/build/angular-ui.js"></script>
+		<script src="components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+		<script src="components/ng-grid/ng-grid-2.0.7.debug.js"></script>
+		<script src="components/ng-grid/plugins/ng-grid-flexible-height.js"></script>		 	
+		<script src="components/ace-builds/src-min-noconflict/ace.js"></script>		
+		<script src="components/angular-ui-ace/ui-ace.js"></script>
+		<script src="components/xdate/src/xdate.js"></script>
 
-		<script type="text/javascript" src="bower_components/google-code-prettify/src/prettify.js"></script>
+		<script src="js/app.js"></script>
 
-		<script src="coffee/TopologyGridController.js"></script>
+		<script src="js/services/alerts.js"></script>
+		<script src="js/services/TimeFunctions.js"></script>
+		<script src="js/services/xmlFormatter.js"></script>
+		<script src="js/services/topologies.js"></script>
+		<script src="js/services/config.js"></script>
+		
+		<script src="js/controller/TopologyGridController.js"></script>
+		<script src="js/controller/ModalEditTopologyController.js"></script>
+		<script src="js/controller/ConfigController.js"></script>
+		<script src="js/controller/TabsController.js"></script>
+		<script src="js/routes.js"></script>
 	</head>
-	<body ng-controller="TopologyGridController">
+	<body>
 
 		<div class="container">
 
-			<div class="pull-right">
+			<div class="pull-right" ng-controller="ConfigController">
 				{{config.user}} on http://{{config.server}}:{{config.port}}
 			</div>
 			<h1>CloudInsight UI</h1>
@@ -36,97 +46,15 @@
 			<br/>
 
 			<div class="row">
-				<div class="span2">
+				<div class="span2" ng-controller="TabsController">
 					<tabset vertical="true" type="'pills'">
-						<tab heading="Topologies"></tab>
-						<tab heading="Next Module"></tab>
-							<!--<img src="http://www.trafficpolicemumbai.org/marathi/marimage/website_under_construction.gif">-->
+						<tab heading="Topologies" select="navigate('topologies')"></tab>
+						<tab heading="Next Module" select="navigate('nextmodule')"></tab>
+							<!-- <img src="http://www.trafficpolicemumbai.org/marathi/marimage/website_under_construction.gif">-->
 						</tab>				
 					</tabset>
 				</div>
-				<div class="span10">
-					<div>
-					  <alert ng-repeat="alert in main_alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
-					</div>
-					
-					<button ng-click="newTopology()" class="btn">New</button>
-					<button ng-click="deleteTopology()" class="btn">Delete</button>
-					<button ng-click="deployTopology()" class="btn">Deploy</button>
-					<button ng-click="undeployTopology()" class="btn">Undeploy</button>
-					<button ng-click="repairTopology()" class="btn">Repair</button>
-					
-					<br/>
-					<br/>
-
-					<div ng-grid="gridOptions" class="gridStyle"></div>
-					<br/>
-					<div class="pull-left">
-						Search: <input type="text" id="search" ng-model="filterText">
-					</div>
-
-					<div ng-controller="ModalEditTopologyController">
-
-					    <div modal="topologyToEdit" close="close()" options="opts">
-					        <div class="modal-header">
-					            <h3>Edit topology</h3>
-					        </div>
-					        <div class="modal-body">
-								<div>
-								  <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
-								</div>
-
-					        	<form class="form-horizontal content">
-					        		<div class="control-group">
-										<label class="control-label" for="inputName">Name</label>
-										<div class="controls">
-											<input type="text" id="inputName" ng-model="topologyToEdit.name">
-										</div>
-									</div>
-					        		<div class="control-group">
-										<label class="control-label" for="inputDescription">Description</label>
-										<div class="controls">
-											<input type="text" id="inputDescription" ng-model="topologyToEdit.description">
-										</div>
-									</div>
-					        		<div class="control-group">
-										<label class="control-label" for="inputDefinition">Definition</label>
-										<div class="controls">
-											<div ui-ace="{
-											  useWrapMode : false,
-											  showGutter: false,
-											  theme:'chrome',
-											  mode: 'xml'
-											}" ng-model="topologyToEdit.pattern"></div>
-										</div>
-									</div>
-			 		        	</form>
-			 		        	<hr/>
-								<form action="/apiproxy/uploaded_files?file_type=war_file" ng-upload class="form-horizontal"> 
-			 		        		<div class="control-group">
-										<label class="control-label" for="inputName">War file:</label>
-										<div class="controls">
-										 	<input type="file" name="file"></input>
-			      							<input type="submit" value="Upload" upload-submit="uploadComplete(content, completed)"></input>
-			      						</div>
-			      					</div>
-			    				</form>
-			 					<form action="/apiproxy/uploaded_files?file_type=sql_script_file" ng-upload class="form-horizontal"> 
-			 		        		<div class="control-group">
-										<label class="control-label" for="inputName">Sql file:</label>
-										<div class="controls">
-										 	<input type="file" name="file"></input>
-			      							<input type="submit" value="Upload" upload-submit="uploadComplete(content, completed)"></input>
-			      						</div>
-			      					</div>
-			    				</form>   				
-					        </div>
-					        <div class="modal-footer">
-					            <button class="btn btn-primary" ng-click="save()" ng-disabled="false">Save</button>
-					            <button class="btn" ng-click="close()" ng-disabled="false">Cancel</button>
-					        </div>
-					    </div>
-					</div>
-				</div>
+				<div ng-view></div>
 			</div>
 		</div>
 	</body>

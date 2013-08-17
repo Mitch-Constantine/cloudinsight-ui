@@ -1,0 +1,27 @@
+<div class="span10">
+	<div>
+	  <alert 
+	  	ng-repeat="alert in main_alerts" 
+	  	type="alert.type" 
+	  	close="main_alerts.closeAlert($index)">
+	  	{{alert.msg}}
+	  </alert>
+	</div>
+	
+	<button ng-click="newTopology()" class="btn">New</button>
+	<button ng-click="deleteTopology()" class="btn">Delete</button>
+	<button ng-click="deployTopology()" class="btn">Deploy</button>
+	<button ng-click="undeployTopology()" class="btn">Undeploy</button>
+	<button ng-click="repairTopology()" class="btn">Repair</button>
+	
+	<br/>
+	<br/>
+
+	<div ng-grid="gridOptions" class="gridStyle"></div>
+	<br/>
+	<div class="pull-left">
+		Search: <input type="text" id="search" ng-model="filterText">
+	</div>
+
+	<ng-include src="'partials/topologies/ModalEditTopology.html'"/>
+</div>
